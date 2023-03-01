@@ -1,9 +1,10 @@
 import imageio.v3 as iio
 import numpy as np
 import matplotlib.pyplot as plt
-import open3d as o3d
+import open3d
 import torch
-
+import colorsys
+import random
 
 class Plot:
     @staticmethod
@@ -17,6 +18,7 @@ class Plot:
 
     @staticmethod
     def draw_pc(pc_xyzrgb):
+        import ipdb; ipdb.set_trace()
         pc = open3d.PointCloud()
         pc.points = open3d.Vector3dVector(pc_xyzrgb[:, 0:3])
         if pc_xyzrgb.shape[1] == 3:
@@ -139,10 +141,10 @@ if __name__ == '__main__':
         #colors = rgb_image[yy_rgb, xx_rgb]
         labels = semantic_image[yy_rgb, xx_rgb].squeeze()
         return pcd, labels
-    pcd, labels = semD_to_ptcld(depth_image, semantic_image)
-    import ipdb; ipdb.set_trace()
-    
+    points, labels = semD_to_ptcld(depth_image, semantic_image)
+    #Plot.draw_pc_sem_ins(sub_pc_xyz[0, :, :], labels[0, 0:np.shape(sub_pc_xyz)[1]])    
 
+    Plot.draw_pc_sem_ins(points, labels)  # visualize ground-truth
     # Convert to Open3D.PointCLoud:
     #pcd_o3d = o3d.geometry.PointCloud()  # create a point cloud object
     #pcd_o3d.points = o3d.utility.Vector3dVector(pcd)
