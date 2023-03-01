@@ -19,16 +19,16 @@ class Plot:
     @staticmethod
     def draw_pc(pc_xyzrgb):
         import ipdb; ipdb.set_trace()
-        pc = open3d.PointCloud()
-        pc.points = open3d.Vector3dVector(pc_xyzrgb[:, 0:3])
+        pc = open3d.geometry.PointCloud()
+        pc.points = open3d.utility.Vector3dVector(pc_xyzrgb[:, 0:3])
         if pc_xyzrgb.shape[1] == 3:
             open3d.draw_geometries([pc])
             return 0
         if np.max(pc_xyzrgb[:, 3:6]) > 20:  ## 0-255
-            pc.colors = open3d.Vector3dVector(pc_xyzrgb[:, 3:6] / 255.)
+            pc.colors = open3d.utility.Vector3dVector(pc_xyzrgb[:, 3:6] / 255.)
         else:
-            pc.colors = open3d.Vector3dVector(pc_xyzrgb[:, 3:6])
-        open3d.draw_geometries([pc])
+            pc.colors = open3d.utility.Vector3dVector(pc_xyzrgb[:, 3:6])
+        open3d.visualization.draw_geometries([pc])
         return 0
 
     @staticmethod
