@@ -2,7 +2,7 @@ import imageio.v3 as iio
 import numpy as np
 import matplotlib.pyplot as plt
 import open3d as o3d
-
+import torch
 
 def compute_colored_pointcloud_nested_loops(depth_image, rgb_image):
     """
@@ -72,8 +72,17 @@ if __name__ == '__main__':
     T = np.array([2.5031875059141302e-02, -2.9342312935846411e-04, 6.6238747008330102e-04])
 
     # Read depth and color image:
-    depth_image = iio.imread('../data/depth.png')
-    rgb_image = iio.imread('../data/rgb.jpg')
+   # depth_image = iio.imread('../data/depth.png')
+   # rgb_image = iio.imread('../data/rgb.jpg')
+
+    observations = torch.load("../train_observations_lst.pt")
+    step_index = 3#8 #3 #8 #15 #8 #3
+    end = len(observations[step_index]['depth'])
+    rgb_image = observations[step_index]['rgb'][:end]#[:, 80:-80]
+    depth_image = observations[step_index]['depth'][:end]#[:, 80:-80]
+    semantic_image = observations[step_index]['semantic'][:end]
+    #depth_image = iio.imread('../data/depth.png')
+    depth_image = depth_image.squeeze()
 
     # Display depth and grayscale image:
     fig, axs = plt.subplots(1, 2)

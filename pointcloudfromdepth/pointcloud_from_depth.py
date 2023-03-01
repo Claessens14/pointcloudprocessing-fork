@@ -2,7 +2,7 @@ import imageio.v3 as iio
 import numpy as np
 import matplotlib.pyplot as plt
 import open3d as o3d
-
+import torch
 
 def compute_pcd_nested_loops(depth_im):
     """
@@ -53,8 +53,18 @@ if __name__ == '__main__':
     CY_DEPTH = 2.3844389626620386e+02
 
     # Read depth image:
-    depth_image = iio.imread('../data/depth.png')
-
+    #depth_image = iio.imread('../data/depth.png')
+    
+    
+    observations = torch.load("../train_observations_lst.pt")
+    
+    step_index = 3#8 #3 #8 #15 #8 #3
+    end = len(observations[step_index]['depth'])
+    rgb_image = observations[step_index]['rgb'][:end]#[:, 80:-80]
+    depth_image = observations[step_index]['depth'][:end]#[:, 80:-80]
+    semantic_image = observations[step_index]['semantic'][:end]
+    #depth_image = iio.imread('../data/depth.png')
+    depth_image = depth_image.squeeze()
     # print some properties:
     print(f"Image resolution: {depth_image.shape}")
     print(f"Data type: {depth_image.dtype}")
@@ -72,21 +82,28 @@ if __name__ == '__main__':
     axs[1].imshow(depth_grayscale, cmap="gray")
     axs[1].set_title('Depth grayscale image')
     plt.show()
-
-    # get depth image resolution:
-    height, width = depth_image.shape
-    # compute indices:
-    jj = np.tile(range(width), height)
-    ii = np.repeat(range(height), width)
-    # Compute constants:
-    xx = (jj - CX_DEPTH) / FX_DEPTH
-    yy = (ii - CY_DEPTH) / FY_DEPTH
-    # transform depth image to vector of z:
-    length = height * width
-    z = depth_image.reshape(length)
-    # compute point cloud
-    pcd = np.dstack((xx * z, yy * z, z)).reshape((length, 3))
-
+    
+    def depth_to_ptcld(depth_image):
+        """
+        The function takes in a depth image
+        returns a point cloud
+        """
+        # get depth image resolution:
+        height, width = depth_image.shape
+        # compute indices:
+    
+        jj = np.tile(range(width), height)
+        ii = np.repeat(range(height), width)
+        # Compute constants:
+        xx = (jj - CX_DEPTH) / FX_DEPTH
+        yy = (ii - CY_DEPTH) / FY_DEPTH
+        # transform depth image to vector of z:
+        length = height * width
+        z = depth_image.reshape(length)
+        # compute point cloud
+        pcd = np.dstack((xx * z, yy * z, z)).reshape((length, 3))
+        return pcd
+    pcd = depth_to_ptcld(depth_image)
     # Convert to Open3D.PointCLoud:
     pcd_o3d = o3d.geometry.PointCloud()  # create point cloud object
     pcd_o3d.points = o3d.utility.Vector3dVector(pcd)  # set pcd_np as the point cloud points
